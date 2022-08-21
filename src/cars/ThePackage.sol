@@ -201,8 +201,8 @@ contract ThePackage is Car {
                 if (FLATOUT > car.y)
                     moreBoost += drs(car, firstCar, 0, 0);
             } else if (MID_GAME < car.y && getGap(car, firstCar) != GapType.Small) {
-                uint256 _delta = toShell ? 1 : 0;
-                uint256 _diff = toShell ? 3 : 1;
+                uint256 _delta = toShell ? 1 : 2;
+                uint256 _diff = toShell ? 0 : 1;
                 moreBoost += drs(car, firstCar, _delta, _diff);
                 if (getDelta(car, firstCar) > 3) toShell = true;
             }
