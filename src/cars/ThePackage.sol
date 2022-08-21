@@ -134,9 +134,9 @@ contract ThePackage is Car {
             else if (eco == GapType.Medium) boostCounter += 4;
             else if (eco == GapType.Large) boostCounter += 6;
         } else if (MADMAX < car.y || MADMAX < allCars[1].y) {
-            if (eco == GapType.Small) boostCounter += 1;
+            if (eco == GapType.Small) boostCounter += 0;
             else if (eco == GapType.Medium) boostCounter += 2;
-            else if (eco == GapType.Large) boostCounter += 3;
+            else if (eco == GapType.Large) boostCounter += 2;
         }
 
         if (MADMAX < car.y && ourCarIndex != 0) {
@@ -244,7 +244,7 @@ contract ThePackage is Car {
         else if (MADMAX <= car.y && car.y < FLATOUT)
             (_moreBoost, _toShell) = excess_burn(car, ourCarIndex, 2, toShell);
         else if (FLATOUT <= car.y)
-            (_moreBoost, _toShell) = excess_burn(car, ourCarIndex, 3, toShell);
+            (_moreBoost, _toShell) = excess_burn(car, ourCarIndex, 2, toShell);
     }
 
     function safeBoost(Monaco.CarData[] calldata allCars, uint256 ourCarIndex) private view returns (uint256 _moreBoost) {
