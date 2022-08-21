@@ -4,21 +4,18 @@ pragma solidity 0.8.13;
 import "./Car.sol";
 
 contract ThePackage is Car {
-    uint256 private lastBoost;
-    uint256 private lastShell;
-
     enum GapType {
         Small,
         Medium,
         Large
     }
 
-    uint256 private constant MAX_ACCELERATION = 5;
     uint256 private constant DENIMONATOR = 100;
-    uint256 private constant EARLY_GAME = 320;
-    uint256 private constant MID_GAME = 560;
-    uint256 private constant MADMAX = 750;
-    uint256 private constant ULTRAMAX = 860;
+    // when different race phases START. i.e. engage flat out after y=860
+    uint256 private constant MID_GAME = 400;
+    uint256 private constant MADMAX = 700;
+    uint256 private constant FLATOUT = 860;
+
     uint256 private constant TOP_SPEED = 20;
     uint256 private constant LIMITER = 14;
 
@@ -36,13 +33,13 @@ contract ThePackage is Car {
         if (TOP_SPEED <= car.speed) return;
         uint256 cost = monaco.getAccelerateCost(amount);
         uint threshold;
-        if (car.y < EARLY_GAME) {
+        if (car.y < MID_GAME) {
             threshold = 18;
-        } else if (car.y < MID_GAME) {
+        } else if (MID_GAME <= car.y && car.y < MADMAX) {
             threshold = 14;
-        } else if (car.y < MADMAX) {
+        } else if (car.y <= MADMAX) {
             threshold = 6;
-        } else if (car.y < ULTRAMAX) {
+        } else if (car.y <= FLATOUT) {
             threshold = 2;
         } else {  // we are in the end game now
             threshold = 1;
@@ -65,13 +62,13 @@ contract ThePackage is Car {
         uint threshold;
         if (car.y <= 75) {
             threshold = 8;
-        } else if (car.y < EARLY_GAME) {
-            threshold = 25;
         } else if (car.y < MID_GAME) {
+            threshold = 25;
+        } else if (car.y <= MID_GAME && car.y < MADMAX) {
             threshold = 15;
-        } else if (car.y < MADMAX) {
+        } else if (car.y <= MADMAX) {
             threshold = 6;
-        } else if (car.y < ULTRAMAX) {
+        } else if (car.y <= FLATOUT) {
             threshold = 2;
         } else {  // we are in the end game now
             threshold = 1;
@@ -86,7 +83,7 @@ contract ThePackage is Car {
 
         // starting line
         if (car.y <= 2) {
-            boost(car, 8);
+            boost(car, 6);
             return;
         }
 
@@ -114,21 +111,21 @@ contract ThePackage is Car {
         }
 
         // if we're slow at the end, try to rev the engines
-        if (ULTRAMAX <= car.y && car.speed <= 2) {
+        if (FLATOUT <= car.y && car.speed <= 2) {
             boost(car, 4);
             return;
         }
 
         // if i'm in first place during early game, do nothing
-        if (car.y < EARLY_GAME && ourCarIndex == 0 && rng < 40) {
+        if (car.y < MID_GAME && ourCarIndex == 0 && rng < 40) {
             if (shelled) boost(car, 1);
             return;
-        } else if (car.y < EARLY_GAME && 8 < car.speed) {
+        } else if (car.y < MID_GAME && 8 < car.speed) {
             return;
         }
 
         // if we're in a mad max, burn the money
-        if (ULTRAMAX <= car.y){
+        if (FLATOUT <= car.y){
             if (eco == GapType.Medium) boost(car, 4);
             if (eco == GapType.Large) boost(car, 5);
         } else if (MADMAX < car.y || MADMAX < firstCar.y || MADMAX < secondCar.y && (eco != GapType.Small)) {
@@ -140,7 +137,7 @@ contract ThePackage is Car {
             if (ourCarIndex != 0 && monaco.getShellCost(1) < 100 && rng < 65) {
                 shell(car);
                 shelled = true;
-            } else if (ourCarIndex != 0 && 8 < firstCar.speed) {
+            } else if (ourCarIndex != 0 && 8 < allCars[ourCarIndex - 1].speed && rng < 65) {
                 shell(car);
                 shelled = true;
             }
@@ -149,6 +146,7 @@ contract ThePackage is Car {
         if (ourCarIndex == 0) {
             if (car.y < MADMAX && gap == GapType.Small && delta == GapType.Small) {
                 // let them pass if its early
+                if (car.speed < 2) boost(car, 1);
             } else if (gap == GapType.Large && getGap(secondCar, thirdCar) == GapType.Small) {
                 drs(car, secondCar, 1, 2);  // pull away when 2nd and 3rd are battling
             } else if (gap == GapType.Small && delta != GapType.Small) {
@@ -171,9 +169,9 @@ contract ThePackage is Car {
                 shelled = true;
             }
             if (getGap(car, firstCar) == GapType.Small) {
-                if (ULTRAMAX <= car.y) drs(car, firstCar, 2, 1);
-                if (ULTRAMAX > car.y) drs(car, firstCar, 0, 1);
-            } else if (EARLY_GAME < car.y && getGap(car, firstCar) != GapType.Small) {
+                if (FLATOUT <= car.y) drs(car, firstCar, 2, 1);
+                if (FLATOUT > car.y) drs(car, firstCar, 0, 1);
+            } else if (MID_GAME < car.y && getGap(car, firstCar) != GapType.Small) {
                 uint256 _delta = shelled ? 1 : 0;
                 uint256 _diff = shelled ? 3 : 1;
                 drs(car, firstCar, _delta, _diff);
@@ -181,9 +179,9 @@ contract ThePackage is Car {
             }
             else if (getGap(car, thirdCar) == GapType.Small && !shelled) {
                 // shell(car);
-            } else if (EARLY_GAME < car.y){
-                if (ULTRAMAX <= car.y) drs(car, firstCar, 2, 2);
-                if (ULTRAMAX > car.y) drs(car, firstCar, 1, 1);
+            } else if (MID_GAME < car.y){
+                if (FLATOUT <= car.y) drs(car, firstCar, 2, 2);
+                if (FLATOUT > car.y) drs(car, firstCar, 1, 1);
                 if (rng < 60 && !shelled) {
                     shell(car);
                 }
@@ -196,8 +194,8 @@ contract ThePackage is Car {
             }
 
             if (gap == GapType.Small) {
-                if (ULTRAMAX <= car.y) drs(car, secondCar, 2, 1);
-                if (ULTRAMAX > car.y) drs(car, secondCar, 0, 0);
+                if (FLATOUT <= car.y) drs(car, secondCar, 2, 1);
+                if (FLATOUT > car.y) drs(car, secondCar, 0, 0);
             } else if (gap == GapType.Medium) {
                 drs(car, secondCar, 2, 1);
             } else {
@@ -206,8 +204,8 @@ contract ThePackage is Car {
         }
 
         if (MID_GAME < car.y && car.y < MADMAX) excess_burn(car, ourCarIndex, 1);
-        else if (car.y < ULTRAMAX) excess_burn(car, ourCarIndex, 2);
-        else if (ULTRAMAX <= car.y) excess_burn(car, ourCarIndex, 3);
+        else if (car.y < FLATOUT) excess_burn(car, ourCarIndex, 2);
+        else if (FLATOUT <= car.y) excess_burn(car, ourCarIndex, 3);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -221,7 +219,7 @@ contract ThePackage is Car {
         }
     }
     function excess_burn(Monaco.CarData calldata car, uint256 place, uint256 multiplier) private {
-        uint256 unitCost = 12 * multiplier;
+        uint256 unitCost = 13 * multiplier;
         uint256 targetBal = 15000 - (car.y * unitCost);
         uint256 boostCost = monaco.getAccelerateCost(multiplier);
         uint256 shellCost = monaco.getShellCost(1);
