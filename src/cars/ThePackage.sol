@@ -18,7 +18,8 @@ contract ThePackage is Car {
     uint256 private constant MID_GAME = 410;
     uint256 private constant MADMAX = 720;
     uint256 private constant FLATOUT = 860;
-    uint256 private constant LIMITER = 14;
+    uint256 private constant LIMITER = 20;
+    uint256 private constant DELTA_LIMITER = 8;
 
     constructor(Monaco _monaco) Car(_monaco) {}
 
@@ -90,6 +91,8 @@ contract ThePackage is Car {
             || (getGap(car, opps) == GapType.Medium && MADMAX <= car.y)
         ) {
            return true;
+        } else if ((car.speed < opps.speed) && (DELTA_LIMITER < (opps.speed - car.speed))) {
+            return true;
         } else {
             return false;
         }
