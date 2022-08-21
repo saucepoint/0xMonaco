@@ -43,9 +43,9 @@ contract ThePackage is Car {
         } else if (MID_GAME <= car.y && car.y < MADMAX) {
             threshold = 15;
         } else if (MADMAX <= car.y && car.y < FLATOUT) {
-            threshold = (2200 < car.balance) ? 4 : 5;
+            threshold = (2400 < car.balance) ? 4 : 5;
         } else if (FLATOUT <= car.y) {
-            threshold = (2200 < car.balance) ? 1 : 2;
+            threshold = (2400 < car.balance) ? 1 : 2;
         } else {
             threshold = 4;
         }
@@ -190,7 +190,7 @@ contract ThePackage is Car {
         GapType delta = getDelta(car, secondCar);
         uint256 rng = randomNumbaBaby(car, firstCar, secondCar);
         if (ourCarIndex == 0) {
-            if (car.y < 500) {
+            if (car.y < 550) {
                 // sandbag & do nothing
             } else if (car.y < MADMAX && gap == GapType.Medium && delta == GapType.Small) {
                 // let them pass if its early
@@ -242,8 +242,11 @@ contract ThePackage is Car {
             if (eco == GapType.Medium || eco == GapType.Large) {
                 toShell = true;
             }
-
-            if (gap == GapType.Small) {
+            if (car.y < MID_GAME) {
+                moreBoost += 1;
+            } else if (car.y < 650) {
+                moreBoost += 2;
+            } else if (gap == GapType.Small) {
                 if (MADMAX <= car.y && car.y < FLATOUT)
                     moreBoost += drs(car, secondCar, 0, 0);
                 if (FLATOUT <= car.y)
