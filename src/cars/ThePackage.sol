@@ -194,7 +194,7 @@ contract ThePackage is Car {
     // ----------------------------------------------------------------------------------------------
     // State
     // ----------------------------------------------------------------------------------------------
-    function getGap(Monaco.CarData calldata car, Monaco.CarData calldata opp) private view returns (GapType) {
+    function getGap(Monaco.CarData calldata car, Monaco.CarData calldata opp) private pure returns (GapType) {
         Monaco.CarData calldata lead = car.y < opp.y ? opp : car;
         Monaco.CarData calldata lag = car.y < opp.y ? car : opp;
         if (lead.y - lag.y < 15) {
@@ -206,7 +206,7 @@ contract ThePackage is Car {
         }
     }
 
-    function getDelta(Monaco.CarData calldata car, Monaco.CarData calldata opp) private view returns (GapType) {
+    function getDelta(Monaco.CarData calldata car, Monaco.CarData calldata opp) private pure returns (GapType) {
         Monaco.CarData calldata lead = car.speed < opp.speed ? opp : car;
         Monaco.CarData calldata lag = car.speed < opp.speed ? car : opp;
         if (lead.speed - lag.speed <= 1) {
@@ -218,7 +218,7 @@ contract ThePackage is Car {
         }
     }
 
-    function getEco(Monaco.CarData calldata car, Monaco.CarData calldata opp1, Monaco.CarData calldata opp2) private view returns (GapType) {
+    function getEco(Monaco.CarData calldata car, Monaco.CarData calldata opp1, Monaco.CarData calldata opp2) private pure returns (GapType) {
         uint256 avgEco = (opp1.balance + opp2.balance)/2;
         if (car.balance > ((opp1.balance + opp2.balance)*15)/10) {
             return GapType.Large;  // RICH
