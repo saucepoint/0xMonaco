@@ -14,7 +14,7 @@ contract ThePackage is Car {
     // when different race phases START. i.e. engage flat out after y=860
     uint256 private constant MID_GAME = 400;
     uint256 private constant MADMAX = 700;
-    uint256 private constant FLATOUT = 860;
+    uint256 private constant FLATOUT = 880;
     uint256 private constant LIMITER = 14;
 
     constructor(Monaco _monaco) Car(_monaco) {}
@@ -35,8 +35,8 @@ contract ThePackage is Car {
         if (car.y < MID_GAME) {
             threshold = 18;
         } else if (MID_GAME <= car.y && car.y < MADMAX) {
-            threshold = 14;
-        } else if (MADMAX <= car.y < FLATOUT) {
+            threshold = 12;
+        } else if (MADMAX <= car.y && car.y < FLATOUT) {
             threshold = 2;
         } else if (FLATOUT <= car.y) {
             threshold = 1;
@@ -64,8 +64,8 @@ contract ThePackage is Car {
         } else if (car.y < MID_GAME) {
             threshold = 25;
         } else if (car.y <= MID_GAME && car.y < MADMAX) {
-            threshold = 15;
-        } else if (MADMAX <= car.y < FLATOUT) {
+            threshold = 12;
+        } else if (MADMAX <= car.y && car.y < FLATOUT) {
             threshold = 2;
         } else if (FLATOUT <= car.y) {
             threshold = 1;
@@ -110,8 +110,8 @@ contract ThePackage is Car {
         }
 
         // if we're slow at the end, try to rev the engines
-        if (FLATOUT <= car.y && car.speed <= 2) {
-            boost(car, 4);
+        if (MADMAX <= car.y && car.speed <= 2) {
+            boost(car, 6);
             return;
         }
 
@@ -125,11 +125,13 @@ contract ThePackage is Car {
 
         // if we're in a mad max, burn the money
         if (FLATOUT <= car.y){
-            if (eco == GapType.Medium) boost(car, 4);
-            if (eco == GapType.Large) boost(car, 5);
+            if (eco == GapType.Small) boost(car, 3);
+            else if (eco == GapType.Medium) boost(car, 4);
+            else if (eco == GapType.Large) boost(car, 6);
         } else if (MADMAX < car.y || MADMAX < firstCar.y || MADMAX < secondCar.y && (eco != GapType.Small)) {
-            if (eco == GapType.Medium) boost(car, 2);
-            if (eco == GapType.Large) boost(car, 3);
+            if (eco == GapType.Small) boost(car, 2);
+            else if (eco == GapType.Medium) boost(car, 3);
+            else if (eco == GapType.Large) boost(car, 4);
         }
 
         if (MADMAX < car.y) {
@@ -147,7 +149,7 @@ contract ThePackage is Car {
                 // let them pass if its early
                 if (car.speed < 2) boost(car, 1);
             } else if (gap == GapType.Large && getGap(secondCar, thirdCar) == GapType.Small) {
-                drs(car, secondCar, 1, 2);  // pull away when 2nd and 3rd are battling
+                drs(car, secondCar, 2, 2);  // pull away when 2nd and 3rd are battling
             } else if (gap == GapType.Small && delta != GapType.Small) {
                 drs(car, secondCar, 0, 0);  // maintain pace with them
             } else if (gap == GapType.Medium) {
