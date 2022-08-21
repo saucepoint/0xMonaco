@@ -32,7 +32,7 @@ contract ThePackage is Car {
     }
 
     function boost(Monaco.CarData memory car, uint256 _amount) private {
-        if (car.y < MID_GAME && 12 <= car.speed) return;
+        if (car.y < MID_GAME && 9 <= car.speed) return;
         if (MID_GAME <= car.y && car.y < MADMAX && 20 <= car.speed) return;
         
         uint256 amount = _amount < MAX_DELTA ? _amount : MAX_DELTA;
@@ -42,9 +42,9 @@ contract ThePackage is Car {
         } else if (MID_GAME <= car.y && car.y < MADMAX) {
             threshold = 15;
         } else if (MADMAX <= car.y && car.y < FLATOUT) {
-            threshold = 4;
+            threshold = (2200 < car.balance) ? 4 : 5;
         } else if (FLATOUT <= car.y) {
-            threshold = 1;
+            threshold = (2200 < car.balance) ? 1 : 2;
         } else {
             threshold = 4;
         }
@@ -126,7 +126,7 @@ contract ThePackage is Car {
         }
 
         // if i'm in first place during early game, do nothing
-        if (car.y < MID_GAME && ourCarIndex == 0 && randomNumbaBaby(car, allCars[0], allCars[1]) < 40) {
+        if (car.y < MID_GAME && ourCarIndex == 0 && randomNumbaBaby(car, allCars[0], allCars[1]) < 50) {
             return;
         } else if (car.y < MID_GAME && 8 < car.speed) {
             return;
