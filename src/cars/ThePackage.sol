@@ -156,6 +156,8 @@ contract ThePackage is Car {
                 drs(car, secondCar, 1, 0);  // try to pull away
             } else if (gap == GapType.Medium && eco == GapType.Large) {
                 drs(car, secondCar, 2, 2);  // got cash to burn
+            } else if (gap == GapType.Large) {
+                drs(car, secondCar, 1, 2);
             } else {
                 drs(car, secondCar, 1, 0);
             }
@@ -220,17 +222,18 @@ contract ThePackage is Car {
         }
     }
     function excess_burn(Monaco.CarData calldata car, uint256 place, uint256 multiplier) private {
-        uint256 unitCost = 13 * multiplier;
+        uint256 unitCost = 14;
+        uint256 purchase = unitCost * multiplier;
         uint256 targetBal = 15000 - (car.y * unitCost);
         uint256 boostCost = monaco.getAccelerateCost(multiplier);
         uint256 shellCost = monaco.getShellCost(1);
         bool boostCheaper = boostCost < shellCost ? true : false;
         if (targetBal < car.balance) {
-            if (boostCost < unitCost && place == 0){
+            if (place == 0){
                 boost(car, multiplier);
-            } else if (boostCost < unitCost && boostCheaper) {
+            } else if (boostCheaper) {
                 boost(car, multiplier);
-            } else if (shellCost < unitCost && place != 0) {
+            } else if (place != 0) {
                 shell(car);
             }
         }
