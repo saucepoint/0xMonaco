@@ -204,7 +204,7 @@ contract ThePackage is Car {
                 uint256 _delta = toShell ? 1 : 2;
                 uint256 _diff = toShell ? 0 : 1;
                 moreBoost += drs(car, firstCar, _delta, _diff);
-                if (getDelta(car, firstCar) > 3) toShell = true;
+                if (getDelta(car, firstCar) != GapType.Small ) toShell = true;
             }
             else if (getGap(car, thirdCar) == GapType.Small) {
                 // let them pass
