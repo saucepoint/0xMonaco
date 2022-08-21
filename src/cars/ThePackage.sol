@@ -190,7 +190,7 @@ contract ThePackage is Car {
         GapType delta = getDelta(car, secondCar);
         uint256 rng = randomNumbaBaby(car, firstCar, secondCar);
         if (ourCarIndex == 0) {
-            if (car.y < 550) {
+            if (car.y < 600) {
                 // sandbag & do nothing
             } else if (car.y < MADMAX && gap == GapType.Medium && delta == GapType.Small) {
                 // let them pass if its early
@@ -199,7 +199,7 @@ contract ThePackage is Car {
                 moreBoost += drs(car, secondCar, 1, 2);  // pull away when 2nd and 3rd are battling
             } else if (gap == GapType.Small && delta != GapType.Small) {
                 moreBoost += drs(car, secondCar, 0, 0);  // maintain pace with them
-            } else if (gap == GapType.Medium) {
+            } else if (gap == GapType.Medium && MADMAX <= car.y) {
                 moreBoost += drs(car, secondCar, 1, 0);  // try to pull away
             } else if (gap == GapType.Medium && eco == GapType.Large) {
                 moreBoost += drs(car, secondCar, 2, 2);  // got cash to burn
