@@ -114,7 +114,7 @@ contract ThePackage is Car {
         GapType eco = getEco(car, allCars[1], allCars[2]);
 
         // market dependent boosting
-        if (MADMAX < car.y)
+        if (MID_GAME < car.y)
             boostCounter += max_bid(car);
 
         // if opps is really fast, stop them
