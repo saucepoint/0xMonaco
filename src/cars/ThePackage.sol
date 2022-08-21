@@ -15,9 +15,10 @@ contract ThePackage is Car {
 
     uint256 private constant MAX_ACCELERATION = 5;
     uint256 private constant DENIMONATOR = 100;
-    uint256 private constant MADMAX = 775;
     uint256 private constant EARLY_GAME = 300;
     uint256 private constant MID_GAME = 550;
+    uint256 private constant MADMAX = 775;
+    uint256 private constant ULTRAMAX = 900;
     uint256 private constant LIMITER = 14;
 
     constructor(Monaco _monaco) Car(_monaco) {}
@@ -37,8 +38,12 @@ contract ThePackage is Car {
             threshold = 18;
         } else if (car.y < MID_GAME) {
             threshold = 8;
-        } else {
+        } else if (car.y < MADMAX) {
             threshold = 4;
+        } else if (car.y < ULTRAMAX) {
+            threshold = 2;
+        } else {  // we are in the end game now
+            threshold = 1;
         }
         if (cost <= (car.balance / threshold)) {
             monaco.buyAcceleration(amount);
@@ -57,9 +62,13 @@ contract ThePackage is Car {
         if (car.y < EARLY_GAME) {
             threshold = 25;
         } else if (car.y < MID_GAME) {
-            threshold = 8;
-        } else {
-            threshold = 4;
+            threshold = 10;
+        } else if (car.y < MADMAX) {
+            threshold = 5;
+        } else if (car.y < ULTRAMAX) {
+            threshold = 3;
+        } else {  // we are in the end game now
+            threshold = 2;
         }
         if (cost <= (car.balance / threshold)) {
             monaco.buyShell(1);
@@ -94,13 +103,15 @@ contract ThePackage is Car {
         }
 
         // if we're in a mad max, burn the money
-        if (MADMAX < car.y || MADMAX < firstCar.y || MADMAX < secondCar.y && (eco != GapType.Small)) {
+        if (ULTRAMAX <= car.y){
+            if (eco != GapType.Medium) boost(car, 3);
+            if (eco == GapType.Large) boost(car, 4);            
+        } else if (MADMAX < car.y || MADMAX < firstCar.y || MADMAX < secondCar.y && (eco != GapType.Small)) {
             if (eco == GapType.Medium) boost(car, 2);
             if (eco == GapType.Large) boost(car, 3);
             if (ourCarIndex != 0 && monaco.getShellCost(1) < 100 && rng < 50 && 250 < car.balance) {
                 shell(car);
             }
-
         }
 
         if (ourCarIndex == 0) {
