@@ -186,7 +186,7 @@ contract ThePackage is Car {
             } else if (gap == GapType.Medium && eco == GapType.Large) {
                 moreBoost += drs(car, secondCar, 2, 2);  // got cash to burn
             } else if (gap == GapType.Large) {
-                moreBoost += drs(car, secondCar, 1, 2);
+                moreBoost += drs(car, secondCar, 1, 1);
             } else {
                 moreBoost += drs(car, secondCar, 0, 0);
             }
@@ -214,8 +214,8 @@ contract ThePackage is Car {
                 if (FLATOUT <= car.y)
                     moreBoost += drs(car, firstCar, 2, 2);
                 if (FLATOUT > car.y)
-                    moreBoost += drs(car, firstCar, 1, 1);
-                if (rng < 60 && !toShell) {
+                    moreBoost += drs(car, firstCar, 1, 0);
+                if (rng < 50 && !toShell) {
                     toShell = true;
                 }
             }
