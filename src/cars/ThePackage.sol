@@ -15,8 +15,6 @@ contract ThePackage is Car {
     uint256 private constant MID_GAME = 400;
     uint256 private constant MADMAX = 700;
     uint256 private constant FLATOUT = 860;
-
-    uint256 private constant TOP_SPEED = 20;
     uint256 private constant LIMITER = 14;
 
     constructor(Monaco _monaco) Car(_monaco) {}
@@ -30,7 +28,8 @@ contract ThePackage is Car {
     }
 
     function boost(Monaco.CarData memory car, uint256 amount) private {
-        if (TOP_SPEED <= car.speed) return;
+        if (car.y < MID_GAME && 12 <= car.speed) return;
+        if (MID_GAME <= car.y && car.y < MADMAX && 16 <= car.speed) return;
         uint256 cost = monaco.getAccelerateCost(amount);
         uint threshold;
         if (car.y < MID_GAME) {
