@@ -66,9 +66,9 @@ contract ThePackage is Car {
         } else if (car.y < MADMAX) {
             threshold = 5;
         } else if (car.y < ULTRAMAX) {
-            threshold = 3;
-        } else {  // we are in the end game now
             threshold = 2;
+        } else {  // we are in the end game now
+            threshold = 1;
         }
         if (cost <= (car.balance / threshold)) {
             monaco.buyShell(1);
@@ -109,8 +109,15 @@ contract ThePackage is Car {
         } else if (MADMAX < car.y || MADMAX < firstCar.y || MADMAX < secondCar.y && (eco != GapType.Small)) {
             if (eco == GapType.Medium) boost(car, 2);
             if (eco == GapType.Large) boost(car, 3);
-            if (ourCarIndex != 0 && monaco.getShellCost(1) < 100 && rng < 50 && 250 < car.balance) {
+        }
+
+        if (MADMAX < car.y) {
+            if (ourCarIndex != 0 && monaco.getShellCost(1) < 100 && rng < 65) {
                 shell(car);
+                shelled = true;
+            } else if (ourCarIndex != 0 && 8 < firstCar.speed) {
+                shell(car);
+                shelled = true;
             }
         }
 
