@@ -33,7 +33,7 @@ contract ThePackage is Car {
     }
 
     function boost(Monaco.CarData memory car, uint256 _amount) private {
-        if (car.y < MID_GAME && 9 <= car.speed) return;
+        if (car.y < MID_GAME && 7 <= car.speed) return;
         if (MID_GAME <= car.y && car.y < MADMAX && 26 <= car.speed) return;
         
         uint256 amount = _amount < MAX_DELTA ? _amount : MAX_DELTA;
@@ -114,7 +114,8 @@ contract ThePackage is Car {
         GapType eco = getEco(car, allCars[1], allCars[2]);
 
         // market dependent boosting
-        boostCounter += max_bid(car);
+        if (MADMAX < car.y)
+            boostCounter += max_bid(car);
 
         // if opps is really fast, stop them
         if (ourCarIndex != 0)
@@ -160,8 +161,10 @@ contract ThePackage is Car {
         boostCounter += _boost;
         toShell = toShell || _shell;
 
-        (_boost) = safeBoost(allCars, ourCarIndex);
-        boostCounter += _boost;
+        if (MADMAX <= car.y) {
+            (_boost) = safeBoost(allCars, ourCarIndex);
+            boostCounter += _boost;
+        }
         
         // check for a speed demon in the rear view mirror!
         uint256 lagSpeed;
