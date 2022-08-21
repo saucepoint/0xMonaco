@@ -209,9 +209,9 @@ contract ThePackage is Car {
             }
         }
 
-        if (MID_GAME < car.y && car.y < MADMAX) excess_burn(car, ourCarIndex, 1);
-        else if (MADMAX <= car.y && car.y < FLATOUT) excess_burn(car, ourCarIndex, 2);
-        else if (FLATOUT <= car.y) excess_burn(car, ourCarIndex, 3);
+        if (MID_GAME < car.y && car.y < MADMAX) excess_burn(car, ourCarIndex, 1, shelled);
+        else if (MADMAX <= car.y && car.y < FLATOUT) excess_burn(car, ourCarIndex, 2, shelled);
+        else if (FLATOUT <= car.y) excess_burn(car, ourCarIndex, 3, shelled);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -224,7 +224,7 @@ contract ThePackage is Car {
             boost(car, deltaTarget);
         }
     }
-    function excess_burn(Monaco.CarData calldata car, uint256 place, uint256 multiplier) private {
+    function excess_burn(Monaco.CarData calldata car, uint256 place, uint256 multiplier, bool shelled) private {
         uint256 unitCost = 14;
         uint256 targetBal = 15000 - (car.y * unitCost);
         uint256 boostCost = monaco.getAccelerateCost(multiplier);
@@ -235,8 +235,10 @@ contract ThePackage is Car {
                 boost(car, multiplier);
             } else if (boostCheaper) {
                 boost(car, multiplier);
-            } else if (place != 0) {
+            } else if (place != 0 && !shelled) {
                 shell(car);
+            } else {
+                boost(car, multiplier);
             }
         }
     }
