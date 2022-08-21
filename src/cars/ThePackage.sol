@@ -15,9 +15,9 @@ contract ThePackage is Car {
     uint256 private constant MAX_DELTA = 14;
     uint256 private constant DENIMONATOR = 100;
     // when different race phases START. i.e. engage flat out after y=860
-    uint256 private constant MID_GAME = 430;
-    uint256 private constant MADMAX = 755;
-    uint256 private constant FLATOUT = 850;
+    uint256 private constant MID_GAME = 450;
+    uint256 private constant MADMAX = 770;
+    uint256 private constant FLATOUT = 855;
     uint256 private constant LAGGING_SPEED_DEMON = 16;
     uint256 private constant LIMITER = 20;
     uint256 private constant DELTA_LIMITER = 8;
