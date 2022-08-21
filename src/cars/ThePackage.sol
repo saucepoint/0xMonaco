@@ -12,7 +12,7 @@ contract ThePackage is Car {
     }
 
     uint256 private constant MAX_BID = 5;
-    uint256 private constant MAX_DELTA = 12;
+    uint256 private constant MAX_DELTA = 14;
     uint256 private constant DENIMONATOR = 100;
     // when different race phases START. i.e. engage flat out after y=860
     uint256 private constant MID_GAME = 400;
@@ -45,7 +45,7 @@ contract ThePackage is Car {
         } else if (FLATOUT <= car.y) {
             threshold = 1;
         } else {
-            threshold = 1;
+            threshold = 4;
         }
         uint256 i;
         uint256 boostToBuy;
@@ -58,7 +58,7 @@ contract ThePackage is Car {
                 break;
             }
         }
-        if (!boosted && monaco.getAccelerateCost(1) <= car.balance) monaco.buyAcceleration(amount);
+        if (!boosted && monaco.getAccelerateCost(1) <= (car.balance * 66)/100) monaco.buyAcceleration(1);
     }
 
     function shell(Monaco.CarData memory car) private {
@@ -116,12 +116,11 @@ contract ThePackage is Car {
 
         // if we're slow at the end, try to rev the engines
         if (MADMAX <= car.y && car.speed <= 2) {
-            boost(car, 6);
+            boostCounter += 6;
         }
 
         // if i'm in first place during early game, do nothing
         if (car.y < MID_GAME && ourCarIndex == 0 && randomNumbaBaby(car, allCars[0], allCars[1]) < 40) {
-            if (shelled) boost(car, 1);
             return;
         } else if (car.y < MID_GAME && 8 < car.speed) {
             return;
@@ -155,6 +154,9 @@ contract ThePackage is Car {
         (_boost, _shell) = checkBurn(ourCarIndex, car, toShell);
         boostCounter += _boost;
         toShell = toShell || _shell;
+
+        (_boost) = safeBoost(allCars, ourCarIndex);
+        boostCounter += _boost;
         
         // apply actions
         if (toShell) shell(car);
@@ -188,8 +190,7 @@ contract ThePackage is Car {
             }
         } else if (ourCarIndex == 1) {
             // got money to shell
-            if (
-                || eco == GapType.Large
+            if (eco == GapType.Large
                 || getDelta(car, firstCar) == GapType.Large
             ) {
                 toShell = true;
@@ -230,7 +231,7 @@ contract ThePackage is Car {
             } else if (gap == GapType.Medium) {
                 moreBoost += drs(car, secondCar, 2, 0);
             } else {
-                moreBoost += drs(car, secondCar, 3, 2);
+                moreBoost += drs(car, secondCar, 3, 3);
             }
         }
     }
@@ -242,6 +243,25 @@ contract ThePackage is Car {
             (_moreBoost, _toShell) = excess_burn(car, ourCarIndex, 2, toShell);
         else if (FLATOUT <= car.y)
             (_moreBoost, _toShell) = excess_burn(car, ourCarIndex, 3, toShell);
+    }
+
+    function safeBoost(Monaco.CarData[] calldata allCars, uint256 ourCarIndex) private view returns (uint256 _moreBoost) {
+        uint256 opps1Balance;
+        uint256 opps2Balance;
+        if (ourCarIndex == 0) {
+            opps1Balance = allCars[1].y;
+            opps2Balance = allCars[2].y;
+        } else if (ourCarIndex == 1) {
+            opps1Balance = allCars[0].y;
+            opps2Balance = allCars[2].y;
+        } else if (ourCarIndex == 2) {
+            opps1Balance = allCars[0].y;
+            opps2Balance = allCars[1].y;
+        }
+        uint256 shellCost = monaco.getShellCost(1);
+        if (opps1Balance < shellCost && opps2Balance < shellCost) {
+            _moreBoost = 2;
+        }
     }
 
     function madMaxShelling(Monaco.CarData calldata car, Monaco.CarData calldata opps) private view returns (bool) {
