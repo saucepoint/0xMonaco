@@ -37,9 +37,9 @@ contract ThePackage is Car {
         if (car.y < EARLY_GAME) {
             threshold = 18;
         } else if (car.y < MID_GAME) {
-            threshold = 8;
+            threshold = 10;
         } else if (car.y < MADMAX) {
-            threshold = 4;
+            threshold = 5;
         } else if (car.y < ULTRAMAX) {
             threshold = 2;
         } else {  // we are in the end game now
@@ -62,9 +62,9 @@ contract ThePackage is Car {
         if (car.y < EARLY_GAME) {
             threshold = 25;
         } else if (car.y < MID_GAME) {
-            threshold = 10;
+            threshold = 12;
         } else if (car.y < MADMAX) {
-            threshold = 5;
+            threshold = 6;
         } else if (car.y < ULTRAMAX) {
             threshold = 2;
         } else {  // we are in the end game now
@@ -104,8 +104,8 @@ contract ThePackage is Car {
 
         // if we're in a mad max, burn the money
         if (ULTRAMAX <= car.y){
-            if (eco != GapType.Medium) boost(car, 3);
-            if (eco == GapType.Large) boost(car, 4);            
+            if (eco != GapType.Medium) boost(car, 4);
+            if (eco == GapType.Large) boost(car, 5);
         } else if (MADMAX < car.y || MADMAX < firstCar.y || MADMAX < secondCar.y && (eco != GapType.Small)) {
             if (eco == GapType.Medium) boost(car, 2);
             if (eco == GapType.Large) boost(car, 3);
@@ -139,7 +139,8 @@ contract ThePackage is Car {
                 shelled = true;
             }
             if (getGap(car, firstCar) == GapType.Small) {
-                drs(car, firstCar, 0, 0);
+                if (ULTRAMAX <= car.y) drs(car, firstCar, 2, 1);
+                if (ULTRAMAX > car.y) drs(car, firstCar, 0, 0);
             } else if (getGap(car, firstCar) != GapType.Small) {
                 shell(car);
                 boost(car, 1);
@@ -147,8 +148,9 @@ contract ThePackage is Car {
             else if (getGap(car, thirdCar) == GapType.Small && !shelled) {
                 // shell(car);
             } else {
-                boost(car, 1);
-                if (rng < 30 && !shelled) {
+                if (ULTRAMAX <= car.y) boost(car, 2);
+                if (ULTRAMAX > car.y) boost(car, 1);
+                if (rng < 40 && !shelled) {
                     shell(car);
                 }
             }
@@ -160,7 +162,8 @@ contract ThePackage is Car {
             }
 
             if (gap == GapType.Small) {
-                drs(car, secondCar, 0, 0);
+                if (ULTRAMAX <= car.y) drs(car, secondCar, 2, 1);
+                if (ULTRAMAX > car.y) drs(car, secondCar, 0, 0);
             } else if (gap == GapType.Medium) {
                 drs(car, secondCar, 2, 1);
             } else {
