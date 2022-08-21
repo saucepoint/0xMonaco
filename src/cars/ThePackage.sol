@@ -4,12 +4,14 @@ pragma solidity 0.8.13;
 import "./Car.sol";
 
 contract ThePackage is Car {
+    uint256 private lastMaxBid = 15000;
     enum GapType {
         Small,
         Medium,
         Large
     }
 
+    uint256 private constant MAX_BID = 5;
     uint256 private constant DENIMONATOR = 100;
     // when different race phases START. i.e. engage flat out after y=860
     uint256 private constant MID_GAME = 400;
@@ -29,21 +31,20 @@ contract ThePackage is Car {
 
     function boost(Monaco.CarData memory car, uint256 amount) private {
         if (car.y < MID_GAME && 12 <= car.speed) return;
-        if (MID_GAME <= car.y && car.y < MADMAX && 16 <= car.speed) return;
-        uint256 cost = monaco.getAccelerateCost(amount);
+        if (MID_GAME <= car.y && car.y < MADMAX && 20 <= car.speed) return;
         uint threshold;
         if (car.y < MID_GAME) {
-            threshold = 18;
+            threshold = 20;
         } else if (MID_GAME <= car.y && car.y < MADMAX) {
-            threshold = 12;
+            threshold = 15;
         } else if (MADMAX <= car.y && car.y < FLATOUT) {
-            threshold = 2;
+            threshold = 3;
         } else if (FLATOUT <= car.y) {
             threshold = 1;
         } else {
             threshold = 1;
         }
-        if (cost <= (car.balance / threshold)) {
+        if (monaco.getAccelerateCost(amount) <= (car.balance / threshold)) {
             monaco.buyAcceleration(amount);
         } else if (monaco.getAccelerateCost(amount / 2) <= (car.balance / threshold)) {
             monaco.buyAcceleration(amount / 2);
@@ -96,8 +97,8 @@ contract ThePackage is Car {
         GapType delta = getDelta(car, secondCar);
         GapType eco = getEco(car, secondCar, thirdCar);
 
-        // if its cheap, fuggit
-        if (monaco.getAccelerateCost(1) <= 8) boost(car, 1);
+        // market dependent boosting
+        max_bid(car);
 
         // if opps is really fast, stop them
         if (ourCarIndex != 0 && (
@@ -223,7 +224,6 @@ contract ThePackage is Car {
     }
     function excess_burn(Monaco.CarData calldata car, uint256 place, uint256 multiplier) private {
         uint256 unitCost = 14;
-        uint256 purchase = unitCost * multiplier;
         uint256 targetBal = 15000 - (car.y * unitCost);
         uint256 boostCost = monaco.getAccelerateCost(multiplier);
         uint256 shellCost = monaco.getShellCost(1);
@@ -237,6 +237,14 @@ contract ThePackage is Car {
                 shell(car);
             }
         }
+    }
+    function max_bid(Monaco.CarData calldata car) private {
+        // if its cheap, fuggit
+        uint256 maxBid = monaco.getAccelerateCost(MAX_BID);
+        uint256 _lastBid = (lastMaxBid * 90) / 100;
+        if (MID_GAME < car.y && (maxBid < _lastBid)) boost(car, MAX_BID);
+        else if (monaco.getAccelerateCost(1) <= 8) boost(car, 1);
+        lastMaxBid = maxBid;
     }
 
     // ----------------------------------------------------------------------------------------------
