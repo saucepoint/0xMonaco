@@ -4,7 +4,7 @@ pragma solidity 0.8.13;
 import "./Car.sol";
 
 contract ThePackage is Car {
-    uint256 private lastMaxBid = 15000;
+    uint256 private lastMaxBid;
     enum GapType {
         Small,
         Medium,
@@ -12,7 +12,7 @@ contract ThePackage is Car {
     }
 
     uint256 private constant MAX_BID = 5;
-    uint256 private constant MAX_DELTA = 8;
+    uint256 private constant MAX_DELTA = 6;
     uint256 private constant DENIMONATOR = 100;
     // when different race phases START. i.e. engage flat out after y=860
     uint256 private constant MID_GAME = 400;
@@ -85,7 +85,7 @@ contract ThePackage is Car {
 
         // starting line
         if (car.y <= 2) {
-            boost(car, 6);
+            boost(car, 4);
             return;
         }
 
@@ -131,10 +131,10 @@ contract ThePackage is Car {
             if (eco == GapType.Small) boost(car, 3);
             else if (eco == GapType.Medium) boost(car, 4);
             else if (eco == GapType.Large) boost(car, 6);
-        } else if (MADMAX < car.y || MADMAX < firstCar.y || MADMAX < secondCar.y && (eco != GapType.Small)) {
-            if (eco == GapType.Small) boost(car, 2);
-            else if (eco == GapType.Medium) boost(car, 3);
-            else if (eco == GapType.Large) boost(car, 4);
+        } else if (MADMAX < car.y || MADMAX < secondCar.y) {
+            if (eco == GapType.Small) boost(car, 1);
+            else if (eco == GapType.Medium) boost(car, 2);
+            else if (eco == GapType.Large) boost(car, 3);
         }
 
         if (MADMAX < car.y) {
@@ -183,8 +183,8 @@ contract ThePackage is Car {
                 drs(car, firstCar, _delta, _diff);
                 if (!shelled) shell(car);
             }
-            else if (getGap(car, thirdCar) == GapType.Small && !shelled) {
-                // shell(car);
+            else if (getGap(car, thirdCar) == GapType.Small) {
+                // let them pass
             } else if (MID_GAME < car.y){
                 if (FLATOUT <= car.y) drs(car, firstCar, 2, 2);
                 if (FLATOUT > car.y) drs(car, firstCar, 1, 1);
@@ -200,10 +200,10 @@ contract ThePackage is Car {
             }
 
             if (gap == GapType.Small) {
-                if (FLATOUT <= car.y) drs(car, secondCar, 2, 1);
-                if (FLATOUT > car.y) drs(car, secondCar, 0, 0);
+                if (MADMAX <= car.y && car.y < FLATOUT) drs(car, secondCar, 0, 0);
+                if (FLATOUT <= car.y) drs(car, secondCar, 2, 2);
             } else if (gap == GapType.Medium) {
-                drs(car, secondCar, 2, 1);
+                drs(car, secondCar, 2, 0);
             } else {
                 drs(car, secondCar, 3, 2);
             }
