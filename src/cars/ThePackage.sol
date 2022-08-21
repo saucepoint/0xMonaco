@@ -283,7 +283,7 @@ contract ThePackage is Car {
     }
     function excess_burn(Monaco.CarData calldata car, uint256 place, uint256 multiplier, bool shelled) private view returns (uint256 moreBoost, bool toShell) {
         uint256 unitCost = 13;
-        uint256 targetBal = 15000 - (car.y * unitCost);
+        uint256 targetBal = 16000 - (car.y * unitCost);
         uint256 boostCost = monaco.getAccelerateCost(multiplier);
         uint256 shellCost = monaco.getShellCost(1);
         bool boostCheaper = boostCost < shellCost ? true : false;
