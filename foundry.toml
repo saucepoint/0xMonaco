@@ -1,0 +1,12 @@
+[fmt]
+line_length = 120
+
+[profile.default]
+bytecode_hash = "none"
+optimizer_runs = 1000000
+solc = "0.8.13"
+libs = ["node_modules", "lib"]
+
+[profile.intense]
+fuzz_runs = 10000
+

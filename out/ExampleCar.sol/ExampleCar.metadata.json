@@ -1,0 +1,133 @@
+{
+  "compiler": {
+    "version": "0.8.13+commit.abaa5c0e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "contract Monaco",
+            "name": "_monaco",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint32",
+                "name": "balance",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "speed",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "y",
+                "type": "uint32"
+              },
+              {
+                "internalType": "contract Car",
+                "name": "car",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct Monaco.CarData[]",
+            "name": "allCars",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "ourCarIndex",
+            "type": "uint256"
+          }
+        ],
+        "name": "takeYourTurn",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {},
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {},
+      "version": 1
+    }
+  },
+  "settings": {
+    "compilationTarget": {
+      "src/cars/ExampleCar.sol": "ExampleCar"
+    },
+    "evmVersion": "london",
+    "libraries": {},
+    "metadata": {
+      "bytecodeHash": "none"
+    },
+    "optimizer": {
+      "enabled": true,
+      "runs": 1000000
+    },
+    "remappings": [
+      ":ds-test/=lib/solmate/lib/ds-test/src/",
+      ":forge-std/=lib/forge-std/src/",
+      ":solmate/=lib/solmate/src/"
+    ]
+  },
+  "sources": {
+    "lib/solmate/src/utils/SafeCastLib.sol": {
+      "keccak256": "0x636e0f18c1b287c9342e14660a914b37a927d9f64d6c29e27016784979ce8d59",
+      "license": "AGPL-3.0-only",
+      "urls": [
+        "bzz-raw://7a188290b5ba3c17099bfca1405de70098ee66b0f3027f137de9556ec9300e0e",
+        "dweb:/ipfs/QmeXGCTzCvRvS6GydDTmKD2kfQHdBx1Ffk52CdyN6iqXvd"
+      ]
+    },
+    "src/Monaco.sol": {
+      "keccak256": "0xdcb8cc5694f59418fb80ec7d00c499d475219229fb926825c9cd0974707aaf7e",
+      "license": "MIT",
+      "urls": [
+        "bzz-raw://a1fb189450a57f87ae2b6343756ec1b921295b19c0fbe91c26645ce1ee2a87b6",
+        "dweb:/ipfs/QmWpJo5NtbGqkrYLjVNj1PnQzfnZHA9tLy4XqUHAnyQmdA"
+      ]
+    },
+    "src/cars/Car.sol": {
+      "keccak256": "0x050db21da4a6df3dcb73cfe8bb537fee1e9d5fbd622854de4da5f753b4a6f7b5",
+      "license": "MIT",
+      "urls": [
+        "bzz-raw://969769018e1aee135dd20db4bd108af9813dda965a198533acc890cd0960c931",
+        "dweb:/ipfs/QmenJC5iEZWS9wxoNvwGBGVem4E9DMbNayAZtbpwnTy4av"
+      ]
+    },
+    "src/cars/ExampleCar.sol": {
+      "keccak256": "0x6d2a48bd46fd87dd5f71ff13d3a645944865cb690757a0a2a87a7f6805b1eeab",
+      "license": "MIT",
+      "urls": [
+        "bzz-raw://044116c52d579c895d218476f96cf523db865278534e1aded885d2872b0c01bd",
+        "dweb:/ipfs/QmTafEH5D1Q4tPm267Z5TnQAPwhjdkaqiQxDTbwFmaH4Cx"
+      ]
+    },
+    "src/utils/SignedWadMath.sol": {
+      "keccak256": "0xceb33c70492dbf5590c9840b709b32b8284d687ac283a932f0622db28c3bfe72",
+      "license": "MIT",
+      "urls": [
+        "bzz-raw://319e4b99628a09e6eb1d6cfad5a549bd4b862354129dedf39118461889eccd77",
+        "dweb:/ipfs/Qmbu2RJDAckizshkwr78xGu1nKGKhKxm2CAkayLcxybsm5"
+      ]
+    }
+  },
+  "version": 1
+}
