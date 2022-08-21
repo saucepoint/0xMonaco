@@ -97,7 +97,7 @@ contract ThePackage is Car {
         if (MADMAX < car.y || MADMAX < firstCar.y || MADMAX < secondCar.y && (eco != GapType.Small)) {
             if (eco == GapType.Medium) boost(car, 2);
             if (eco == GapType.Large) boost(car, 3);
-            if (ourCarIndex != 0 && monaco.getShellCost(1) < 100 && rng < 50) {
+            if (ourCarIndex != 0 && monaco.getShellCost(1) < 100 && rng < 50 && 250 < car.balance) {
                 shell(car);
             }
 
