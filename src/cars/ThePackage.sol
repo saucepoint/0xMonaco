@@ -156,7 +156,11 @@ contract ThePackage is Car {
             }
         } else if (ourCarIndex == 1) {
             // got money to shell
-            if (!shelled && (eco == GapType.Medium || eco == GapType.Large)) {
+            if (!shelled && (
+                eco == GapType.Medium
+                || eco == GapType.Large
+                || getDelta(car, firstCar) == GapType.Large
+            )) {
                 shell(car);
                 shelled = true;
             }
