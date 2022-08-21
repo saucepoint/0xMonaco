@@ -18,6 +18,7 @@ contract ThePackage is Car {
     uint256 private constant MID_GAME = 420;
     uint256 private constant MADMAX = 740;
     uint256 private constant FLATOUT = 860;
+    uint256 private constant LAGGING_SPEED_DEMON = 16;
     uint256 private constant LIMITER = 20;
     uint256 private constant DELTA_LIMITER = 8;
 
@@ -109,8 +110,7 @@ contract ThePackage is Car {
 
         uint256 boostCounter;
         bool toShell;
-        GapType gap = getGap(car, allCars[1]);
-        GapType delta = getDelta(car, allCars[1]);
+        bool oppMustBeStopped;
         GapType eco = getEco(car, allCars[1], allCars[2]);
 
         // market dependent boosting
@@ -118,7 +118,7 @@ contract ThePackage is Car {
 
         // if opps is really fast, stop them
         if (ourCarIndex != 0)
-            toShell = oppStopper(car, allCars[ourCarIndex - 1]);
+            oppMustBeStopped = oppStopper(car, allCars[ourCarIndex - 1]);
 
         // if we're slow at the end, try to rev the engines
         if (MADMAX <= car.y && car.speed <= 2) {
@@ -151,8 +151,7 @@ contract ThePackage is Car {
         bool _shell;
         (_boost, _shell) = decision(
             ourCarIndex, car,
-            allCars[0], allCars[1], allCars[2],
-            gap, eco, delta
+            allCars[0], allCars[1], allCars[2], eco
         );
         boostCounter += _boost;
         toShell = toShell || _shell;
@@ -164,8 +163,19 @@ contract ThePackage is Car {
         (_boost) = safeBoost(allCars, ourCarIndex);
         boostCounter += _boost;
         
+        // check for a speed demon in the rear view mirror!
+        uint256 lagSpeed;
+        if (ourCarIndex == 0) {
+            lagSpeed = allCars[1].speed < allCars[2].speed ? allCars[2].speed : allCars[1].speed;
+        } else if (ourCarIndex == 1) {
+            lagSpeed = allCars[2].speed;
+        }
+        
         // apply actions
-        if (toShell) shell(car);
+        // if theres someone behind us & theyre going fast, save the shell instead
+        if (toShell && lagSpeed < LAGGING_SPEED_DEMON) shell(car);
+        else if (oppMustBeStopped) shell(car);
+        
         if (0 < boostCounter) boost(car, boostCounter);
     }
 
@@ -174,8 +184,10 @@ contract ThePackage is Car {
     // ----------------------------------------------------------------------------------------------
     function decision(
         uint256 ourCarIndex, Monaco.CarData calldata car, Monaco.CarData calldata firstCar, Monaco.CarData calldata secondCar, Monaco.CarData calldata thirdCar,
-        GapType gap, GapType eco, GapType delta
+        GapType eco
     ) private pure returns (uint256 moreBoost, bool toShell) {
+        GapType gap = getGap(car, secondCar);
+        GapType delta = getDelta(car, secondCar);
         uint256 rng = randomNumbaBaby(car, firstCar, secondCar);
         if (ourCarIndex == 0) {
             if (car.y < 500) {
@@ -257,14 +269,14 @@ contract ThePackage is Car {
         uint256 opps1Balance;
         uint256 opps2Balance;
         if (ourCarIndex == 0) {
-            opps1Balance = allCars[1].y;
-            opps2Balance = allCars[2].y;
+            opps1Balance = allCars[1].balance;
+            opps2Balance = allCars[2].balance;
         } else if (ourCarIndex == 1) {
-            opps1Balance = allCars[0].y;
-            opps2Balance = allCars[2].y;
+            opps1Balance = allCars[0].balance;
+            opps2Balance = allCars[2].balance;
         } else if (ourCarIndex == 2) {
-            opps1Balance = allCars[0].y;
-            opps2Balance = allCars[1].y;
+            opps1Balance = allCars[0].balance;
+            opps2Balance = allCars[1].balance;
         }
         uint256 shellCost = monaco.getShellCost(1);
         if (opps1Balance < shellCost && opps2Balance < shellCost) {
