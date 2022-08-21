@@ -19,7 +19,7 @@ contract ThePackage is Car {
     uint256 private constant MID_GAME = 550;
     uint256 private constant MADMAX = 775;
     uint256 private constant ULTRAMAX = 900;
-    uint256 private constant LIMITER = 14;
+    uint256 private constant LIMITER = 16;
 
     constructor(Monaco _monaco) Car(_monaco) {}
 
@@ -35,9 +35,9 @@ contract ThePackage is Car {
         uint256 cost = monaco.getAccelerateCost(amount);
         uint threshold;
         if (car.y < EARLY_GAME) {
-            threshold = 18;
+            threshold = 20;
         } else if (car.y < MID_GAME) {
-            threshold = 10;
+            threshold = 12;
         } else if (car.y < MADMAX) {
             threshold = 5;
         } else if (car.y < ULTRAMAX) {
@@ -94,11 +94,17 @@ contract ThePackage is Car {
         GapType delta = getDelta(car, secondCar);
         GapType eco = getEco(car, secondCar, thirdCar);
 
-        // if its free, fuggit
-        if (monaco.getAccelerateCost(1) == 0) boost(car, 1);
+        // if its cheap, fuggit
+        if (monaco.getAccelerateCost(1) <= 3) boost(car, 1);
+
+        // if opps is really fast, stop them
+        if (ourCarIndex != 0 && LIMITER <= allCars[ourCarIndex - 1].speed) {
+            shell(car);
+            shelled = true;
+        }
 
         // if i'm in first place during early game, do nothing
-        if (car.y < EARLY_GAME && ourCarIndex == 0 && rng < 30) {
+        if (car.y < EARLY_GAME && ourCarIndex == 0 && rng < 40) {
             return;
         }
 
@@ -122,15 +128,18 @@ contract ThePackage is Car {
         }
 
         if (ourCarIndex == 0) {
-            if (gap == GapType.Small && delta == GapType.Small) {
-                // let them pass
+            if (car.y < MADMAX && gap == GapType.Small && delta == GapType.Small) {
+                // let them pass if its early
+            } else if (gap == GapType.Large && getGap(secondCar, thirdCar) == GapType.Small) {
+                drs(car, secondCar, 1, 2);  // pull away when 2nd and 3rd are battling
             } else if (gap == GapType.Small && delta != GapType.Small) {
                 drs(car, secondCar, 0, 0);  // maintain pace with them
-            }
-            else if (gap == GapType.Medium) {
-                drs(car, secondCar, 0, 1);  // try to pull away
+            } else if (gap == GapType.Medium) {
+                drs(car, secondCar, 1, 0);  // try to pull away
             } else if (gap == GapType.Medium && eco == GapType.Large) {
                 drs(car, secondCar, 2, 2);  // got cash to burn
+            } else {
+                drs(car, secondCar, 1, 0);
             }
         } else if (ourCarIndex == 1) {
             // got money to shell
@@ -140,17 +149,17 @@ contract ThePackage is Car {
             }
             if (getGap(car, firstCar) == GapType.Small) {
                 if (ULTRAMAX <= car.y) drs(car, firstCar, 2, 1);
-                if (ULTRAMAX > car.y) drs(car, firstCar, 0, 0);
+                if (ULTRAMAX > car.y) drs(car, firstCar, 0, 1);
             } else if (getGap(car, firstCar) != GapType.Small) {
+                drs(car, firstCar, 0, 1);
                 shell(car);
-                boost(car, 1);
             }
             else if (getGap(car, thirdCar) == GapType.Small && !shelled) {
                 // shell(car);
             } else {
-                if (ULTRAMAX <= car.y) boost(car, 2);
-                if (ULTRAMAX > car.y) boost(car, 1);
-                if (rng < 40 && !shelled) {
+                if (ULTRAMAX <= car.y) drs(car, firstCar, 2, 2);
+                if (ULTRAMAX > car.y) drs(car, firstCar, 1, 1);
+                if (rng < 60 && !shelled) {
                     shell(car);
                 }
             }
@@ -185,7 +194,7 @@ contract ThePackage is Car {
         }
     }
     function excess_burn(Monaco.CarData calldata car, uint256 place) private {
-        uint256 unitCost = 14;
+        uint256 unitCost = 13;
         uint256 targetBal = 15000 - (car.y * unitCost);
         uint256 boostCost = monaco.getAccelerateCost(1);
         uint256 shellCost = monaco.getShellCost(1);
