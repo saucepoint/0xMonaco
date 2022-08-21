@@ -106,10 +106,11 @@ contract ThePackage is Car {
         if (monaco.getAccelerateCost(1) <= 3) boost(car, 1);
 
         // if opps is really fast, stop them
-        if (ourCarIndex != 0 && (LIMITER <= allCars[ourCarIndex - 1].speed
+        if (ourCarIndex != 0 && (
+            LIMITER <= allCars[ourCarIndex - 1].speed
             || (getGap(car, allCars[ourCarIndex - 1]) == GapType.Large)
-            || (getGap(car, allCars[ourCarIndex - 1]) == GapType.Medium && MADMAX <= car.y)
-        )) {
+            || (getGap(car, allCars[ourCarIndex - 1]) == GapType.Medium && MADMAX <= car.y))
+        ) {
             shell(car);
             shelled = true;
         }
