@@ -186,7 +186,7 @@ contract ThePackage is Car {
             } else if (gap == GapType.Large) {
                 moreBoost += drs(car, secondCar, 1, 2);
             } else {
-                moreBoost += drs(car, secondCar, 1, 0);
+                moreBoost += drs(car, secondCar, 0, 0);
             }
         } else if (ourCarIndex == 1) {
             // got money to shell
@@ -199,12 +199,12 @@ contract ThePackage is Car {
                 if (FLATOUT <= car.y)
                     moreBoost += drs(car, firstCar, 2, 1);
                 if (FLATOUT > car.y)
-                    moreBoost += drs(car, firstCar, 0, 1);
+                    moreBoost += drs(car, firstCar, 0, 0);
             } else if (MID_GAME < car.y && getGap(car, firstCar) != GapType.Small) {
                 uint256 _delta = toShell ? 1 : 0;
                 uint256 _diff = toShell ? 3 : 1;
                 moreBoost += drs(car, firstCar, _delta, _diff);
-                toShell = true;
+                if (getDelta(car, firstCar) > 3) toShell = true;
             }
             else if (getGap(car, thirdCar) == GapType.Small) {
                 // let them pass
@@ -282,7 +282,7 @@ contract ThePackage is Car {
         moreBoost = (opp.speed < car.speed) ? fasterCase : (opp.speed + delta - car.speed);
     }
     function excess_burn(Monaco.CarData calldata car, uint256 place, uint256 multiplier, bool shelled) private view returns (uint256 moreBoost, bool toShell) {
-        uint256 unitCost = 14;
+        uint256 unitCost = 13;
         uint256 targetBal = 15000 - (car.y * unitCost);
         uint256 boostCost = monaco.getAccelerateCost(multiplier);
         uint256 shellCost = monaco.getShellCost(1);
