@@ -33,7 +33,7 @@ contract ThePackage is Car {
     }
 
     function boost(Monaco.CarData memory car, uint256 _amount) private {
-        if (car.y < MID_GAME && 7 <= car.speed) return;
+        if (car.y < 300 && 7 <= car.speed) return;
         if (MID_GAME <= car.y && car.y < MADMAX && 26 <= car.speed) return;
         
         uint256 amount = _amount < MAX_DELTA ? _amount : MAX_DELTA;
