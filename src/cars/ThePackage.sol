@@ -19,6 +19,7 @@ contract ThePackage is Car {
     uint256 private constant MID_GAME = 550;
     uint256 private constant MADMAX = 775;
     uint256 private constant ULTRAMAX = 900;
+    uint256 private constant TOP_SPEED = 20;
     uint256 private constant LIMITER = 15;
 
     constructor(Monaco _monaco) Car(_monaco) {}
@@ -32,10 +33,11 @@ contract ThePackage is Car {
     }
 
     function boost(Monaco.CarData memory car, uint256 amount) private {
+        if (TOP_SPEED <= car.speed) return;
         uint256 cost = monaco.getAccelerateCost(amount);
         uint threshold;
         if (car.y < EARLY_GAME) {
-            threshold = 20;
+            threshold = 18;
         } else if (car.y < MID_GAME) {
             threshold = 14;
         } else if (car.y < MADMAX) {
@@ -86,6 +88,8 @@ contract ThePackage is Car {
         if (car.y <= 2) {
             boost(car, 1);
             return;
+        } else if (monaco.turns() == 3) {
+            boost(car, 4);
         }
 
         Monaco.CarData calldata firstCar = allCars[0];
@@ -103,7 +107,9 @@ contract ThePackage is Car {
 
         // if opps is really fast, stop them
         if (ourCarIndex != 0 && (LIMITER <= allCars[ourCarIndex - 1].speed
-            || getGap(car, allCars[ourCarIndex - 1]) == GapType.Large)) {
+            || (getGap(car, allCars[ourCarIndex - 1]) == GapType.Large)
+            || (getGap(car, allCars[ourCarIndex - 1]) == GapType.Medium && MADMAX <= car.y)
+        )) {
             shell(car);
             shelled = true;
         }
@@ -249,7 +255,7 @@ contract ThePackage is Car {
 
     function getEco(Monaco.CarData calldata car, Monaco.CarData calldata opp1, Monaco.CarData calldata opp2) private pure returns (GapType) {
         uint256 avgEco = (opp1.balance + opp2.balance)/2;
-        if (car.balance > ((opp1.balance + opp2.balance)*15)/10) {
+        if (car.balance > ((avgEco*15)/10)) {
             return GapType.Large;  // RICH
         } else if (car.balance  <= ((avgEco * 87) / 100)) {
             return GapType.Small; // POOR
