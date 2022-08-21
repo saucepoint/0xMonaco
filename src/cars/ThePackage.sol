@@ -139,7 +139,7 @@ contract ThePackage is Car {
             else if (eco == GapType.Large) boostCounter += 6;
         } else if (MADMAX < car.y || MADMAX < allCars[1].y) {
             if (eco == GapType.Small) boostCounter += 0;
-            else if (eco == GapType.Medium) boostCounter += 2;
+            else if (eco == GapType.Medium) boostCounter += 1;
             else if (eco == GapType.Large) boostCounter += 2;
         }
 
@@ -178,11 +178,13 @@ contract ThePackage is Car {
     ) private pure returns (uint256 moreBoost, bool toShell) {
         uint256 rng = randomNumbaBaby(car, firstCar, secondCar);
         if (ourCarIndex == 0) {
-            if (car.y < MADMAX && gap == GapType.Small && delta == GapType.Small) {
+            if (car.y < 500) {
+                // sandbag & do nothing
+            } else if (car.y < MADMAX && gap == GapType.Medium && delta == GapType.Small) {
                 // let them pass if its early
                 if (car.speed < 2) moreBoost += 1;
             } else if (gap == GapType.Large && getGap(secondCar, thirdCar) == GapType.Small) {
-                moreBoost += drs(car, secondCar, 2, 2);  // pull away when 2nd and 3rd are battling
+                moreBoost += drs(car, secondCar, 1, 2);  // pull away when 2nd and 3rd are battling
             } else if (gap == GapType.Small && delta != GapType.Small) {
                 moreBoost += drs(car, secondCar, 0, 0);  // maintain pace with them
             } else if (gap == GapType.Medium) {
