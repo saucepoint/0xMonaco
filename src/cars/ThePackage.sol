@@ -15,8 +15,8 @@ contract ThePackage is Car {
     uint256 private constant MAX_DELTA = 14;
     uint256 private constant DENIMONATOR = 100;
     // when different race phases START. i.e. engage flat out after y=860
-    uint256 private constant MID_GAME = 420;
-    uint256 private constant MADMAX = 740;
+    uint256 private constant MID_GAME = 430;
+    uint256 private constant MADMAX = 750;
     uint256 private constant FLATOUT = 860;
     uint256 private constant LAGGING_SPEED_DEMON = 16;
     uint256 private constant LIMITER = 20;
@@ -103,8 +103,8 @@ contract ThePackage is Car {
         Monaco.CarData calldata car = allCars[ourCarIndex];
 
         // starting line
-        if (car.y <= 2) {
-            boost(car, 4);
+        if (car.y <= 1) {
+            boost(car, 3);
             return;
         }
 
@@ -323,7 +323,7 @@ contract ThePackage is Car {
     function max_bid(Monaco.CarData calldata car) private returns (uint256 moreBoost) {
         // if its cheap, fuggit
         uint256 maxBid = monaco.getAccelerateCost(MAX_BID);
-        uint256 _lastBid = (lastMaxBid * 90) / 100;
+        uint256 _lastBid = (lastMaxBid * 85) / 100;
         if (MID_GAME < car.y && (maxBid < _lastBid)) moreBoost = MAX_BID;
         else if (monaco.getAccelerateCost(1) <= 8) moreBoost = 1;
         lastMaxBid = maxBid;
