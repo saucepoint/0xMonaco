@@ -114,7 +114,8 @@ contract ThePackage is Car {
         boostCounter += max_bid(car);
 
         // if opps is really fast, stop them
-        if (ourCarIndex != 0) oppStopper(car, allCars[ourCarIndex - 1]);
+        if (ourCarIndex != 0)
+            toShell = oppStopper(car, allCars[ourCarIndex - 1]);
 
         // if we're slow at the end, try to rev the engines
         if (MADMAX <= car.y && car.speed <= 2) {
