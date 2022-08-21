@@ -210,7 +210,7 @@ contract ThePackage is Car {
         }
 
         if (MID_GAME < car.y && car.y < MADMAX) excess_burn(car, ourCarIndex, 1);
-        else if (car.y < FLATOUT) excess_burn(car, ourCarIndex, 2);
+        else if (MADMAX <= car.y && car.y < FLATOUT) excess_burn(car, ourCarIndex, 2);
         else if (FLATOUT <= car.y) excess_burn(car, ourCarIndex, 3);
     }
 
