@@ -68,7 +68,7 @@ contract ThePackage is Car {
             threshold = 8;
         } else if (car.y < MID_GAME) {
             threshold = 25;
-        } else if (car.y <= MID_GAME && car.y < MADMAX) {
+        } else if  (MID_GAME <= car.y && car.y < MADMAX) {
             threshold = 15;
         } else if (MADMAX <= car.y && car.y < FLATOUT) {
             threshold = 3;
