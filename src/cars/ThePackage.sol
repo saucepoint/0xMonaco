@@ -36,11 +36,11 @@ contract ThePackage is Car {
             threshold = 18;
         } else if (MID_GAME <= car.y && car.y < MADMAX) {
             threshold = 14;
-        } else if (car.y <= MADMAX) {
-            threshold = 6;
-        } else if (car.y <= FLATOUT) {
+        } else if (MADMAX <= car.y < FLATOUT) {
             threshold = 2;
-        } else {  // we are in the end game now
+        } else if (FLATOUT <= car.y) {
+            threshold = 1;
+        } else {
             threshold = 1;
         }
         if (cost <= (car.balance / threshold)) {
@@ -65,11 +65,11 @@ contract ThePackage is Car {
             threshold = 25;
         } else if (car.y <= MID_GAME && car.y < MADMAX) {
             threshold = 15;
-        } else if (car.y <= MADMAX) {
-            threshold = 6;
-        } else if (car.y <= FLATOUT) {
+        } else if (MADMAX <= car.y < FLATOUT) {
             threshold = 2;
-        } else {  // we are in the end game now
+        } else if (FLATOUT <= car.y) {
+            threshold = 1;
+        } else {
             threshold = 1;
         }
         if (cost <= (car.balance / threshold)) {
