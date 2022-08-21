@@ -15,12 +15,12 @@ contract ThePackage is Car {
 
     uint256 private constant MAX_ACCELERATION = 5;
     uint256 private constant DENIMONATOR = 100;
-    uint256 private constant EARLY_GAME = 300;
+    uint256 private constant EARLY_GAME = 320;
     uint256 private constant MID_GAME = 550;
-    uint256 private constant MADMAX = 775;
+    uint256 private constant MADMAX = 770;
     uint256 private constant ULTRAMAX = 900;
     uint256 private constant TOP_SPEED = 20;
-    uint256 private constant LIMITER = 15;
+    uint256 private constant LIMITER = 14;
 
     constructor(Monaco _monaco) Car(_monaco) {}
 
@@ -64,7 +64,7 @@ contract ThePackage is Car {
         uint256 cost = monaco.getShellCost(1);
         uint threshold;
         if (car.y <= 75) {
-            threshold = 3;
+            threshold = 8;
         } else if (car.y < EARLY_GAME) {
             threshold = 25;
         } else if (car.y < MID_GAME) {
@@ -86,10 +86,8 @@ contract ThePackage is Car {
 
         // starting line
         if (car.y <= 2) {
-            boost(car, 1);
+            boost(car, 8);
             return;
-        } else if (monaco.turns() == 3) {
-            boost(car, 4);
         }
 
         Monaco.CarData calldata firstCar = allCars[0];
@@ -103,7 +101,7 @@ contract ThePackage is Car {
         GapType eco = getEco(car, secondCar, thirdCar);
 
         // if its cheap, fuggit
-        if (monaco.getAccelerateCost(1) <= 3) boost(car, 1);
+        if (monaco.getAccelerateCost(1) <= 10) boost(car, 1);
 
         // if opps is really fast, stop them
         if (ourCarIndex != 0 && (
@@ -197,7 +195,9 @@ contract ThePackage is Car {
             }
         }
 
-        if (MID_GAME < car.y) excess_burn(car, ourCarIndex);
+        if (MID_GAME < car.y && car.y < MADMAX) excess_burn(car, ourCarIndex, 1);
+        else if (car.y < ULTRAMAX) excess_burn(car, ourCarIndex, 2);
+        else if (ULTRAMAX <= car.y) excess_burn(car, ourCarIndex, 3);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -210,17 +210,17 @@ contract ThePackage is Car {
             boost(car, deltaTarget);
         }
     }
-    function excess_burn(Monaco.CarData calldata car, uint256 place) private {
-        uint256 unitCost = 12;
+    function excess_burn(Monaco.CarData calldata car, uint256 place, uint256 multiplier) private {
+        uint256 unitCost = 12 * multiplier;
         uint256 targetBal = 15000 - (car.y * unitCost);
-        uint256 boostCost = monaco.getAccelerateCost(1);
+        uint256 boostCost = monaco.getAccelerateCost(multiplier);
         uint256 shellCost = monaco.getShellCost(1);
         bool boostCheaper = boostCost < shellCost ? true : false;
         if (targetBal < car.balance) {
             if (boostCost < unitCost && place == 0){
-                boost(car, 1);
+                boost(car, multiplier);
             } else if (boostCost < unitCost && boostCheaper) {
-                boost(car, 1);
+                boost(car, multiplier);
             } else if (shellCost < unitCost && place != 0) {
                 shell(car);
             }
