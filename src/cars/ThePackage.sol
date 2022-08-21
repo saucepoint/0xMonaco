@@ -12,6 +12,7 @@ contract ThePackage is Car {
     }
 
     uint256 private constant MAX_BID = 5;
+    uint256 private constant MAX_DELTA = 8;
     uint256 private constant DENIMONATOR = 100;
     // when different race phases START. i.e. engage flat out after y=860
     uint256 private constant MID_GAME = 400;
@@ -29,9 +30,10 @@ contract ThePackage is Car {
         ))) % DENIMONATOR;
     }
 
-    function boost(Monaco.CarData memory car, uint256 amount) private {
+    function boost(Monaco.CarData memory car, uint256 _amount) private {
         if (car.y < MID_GAME && 12 <= car.speed) return;
         if (MID_GAME <= car.y && car.y < MADMAX && 20 <= car.speed) return;
+        uint256 amount = _amount < MAX_DELTA ? _amount : MAX_DELTA;
         uint threshold;
         if (car.y < MID_GAME) {
             threshold = 20;
