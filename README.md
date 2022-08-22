@@ -4,7 +4,7 @@
 
 ---
 
-
+![thepackage](clout/thepackage.png)
 
 My original implementation `ClownCar.sol` was based on random number generation. It would've been funny to prove that random actions are viable, but after decent races followed by plummeting down the leaderboard I wanted to take it more serious. Enter `ThePackage.sol`, an entire upgrade to the car.
 
