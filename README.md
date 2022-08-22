@@ -16,7 +16,7 @@ Woo, yet another conditional-focused car. I'll focus on some interesting tid bit
 
 * My inner gamer menality realized there's stages to the race. I was getting robbed at the finish line all too often
     * 4 stages: early game, mid game, mad-max, and flat out
-    * similar approach to [0age's race winning car](https://gist.github.com/0age/3600aebdd97981c60906c8cb50c13279)
+    * analogous to [0age's race winning car](https://gist.github.com/0age/3600aebdd97981c60906c8cb50c13279)
     * also shouting out fellow racer Mark Toda for also [distinguishing stages](https://github.com/marktoda/paradigm-ctf/tree/main/src/monaco)
 
 * Speed Demon Detection
@@ -73,3 +73,5 @@ One of the first to break 1400 ELO (saturday night)
 Held first place with 3 hours left. Opps too stronk at the end
 ![latefirst](clout/latefirst.png)
 
+Funny, unintentional 69
+![sixtynine](clout/sixtynine.png)
