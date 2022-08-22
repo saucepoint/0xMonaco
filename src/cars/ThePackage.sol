@@ -11,19 +11,31 @@ contract ThePackage is Car {
         Large
     }
 
+    // maximum accelerants to buy, if we engage max bidding
     uint256 private constant MAX_BID = 6;
+
+    // maximum accelerants to buy for a given turn
     uint256 private constant MAX_DELTA = 16;
-    uint256 private constant DENIMONATOR = 100;
-    // when different race phases START. i.e. engage flat out after y=860
-    uint256 private constant MID_GAME = 450;
+    
+    // when different race phases start i.e. engage "flat out mode" after y=860
+    uint256 private constant MID_GAME = 450;  // pretty much do nothing up until this point
     uint256 private constant MADMAX = 770;
-    uint256 private constant FLATOUT = 855;
+    uint256 private constant FLATOUT = 855;  // go all out, try to spend the funds
+
+    // threshold for determining if theres a speed demon behind us
     uint256 private constant LAGGING_SPEED_DEMON = 16;
+    
+    // if car in front has a speed higher than this, hit them with the "dont"
     uint256 private constant LIMITER = 18;
+
+    // if car in front has a delta higher than this, hit them with the "dont"
     uint256 private constant DELTA_LIMITER = 8;
+
+    uint256 private constant DENIMONATOR = 100;
 
     constructor(Monaco _monaco) Car(_monaco) {}
 
+    // pseudo-random number generator, because i dont trust myself with decisions
     function randomNumbaBaby(Monaco.CarData memory ourCar, Monaco.CarData calldata opps1, Monaco.CarData calldata opps2) private pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(
             ourCar.balance, ourCar.speed, ourCar.y,
@@ -32,23 +44,33 @@ contract ThePackage is Car {
         ))) % DENIMONATOR;
     }
 
+    // Wraps monaco.buyAcceleration() with some economy checks
     function boost(Monaco.CarData memory car, uint256 _amount) private {
+        // no need to spend monies on early game speed
         if (car.y < 300 && 7 <= car.speed) return;
         if (MID_GAME <= car.y && car.y < MADMAX && 26 <= car.speed) return;
         
+        // max limit how much accelerant to buy
         uint256 amount = _amount < MAX_DELTA ? _amount : MAX_DELTA;
+        
+        // sets the budget -- the fraction of cash.balance we're allowed to spend
+        // i.e. in the early game, do not spend more than 1/20th of our balance
         uint threshold;
         if (car.y < MID_GAME) {
             threshold = 20;
         } else if (MID_GAME <= car.y && car.y < MADMAX) {
             threshold = 10;
         } else if (MADMAX <= car.y && car.y < FLATOUT) {
+            // if theres some excess cash, fuggit allow a higher spend
             threshold = (2400 < car.balance) ? 4 : 5;
         } else if (FLATOUT <= car.y) {
+            // if theres some excess cash, fuggit allow a higher spend
             threshold = (2400 < car.balance) ? 1 : 2;
         } else {
             threshold = 4;
         }
+
+        // loop to find the amount of accelerant thats within our budget
         uint256 i;
         uint256 boostToBuy;
         bool boosted;
@@ -60,11 +82,17 @@ contract ThePackage is Car {
                 break;
             }
         }
+
+        // if we didnt boost, but there was a request to boost
+        // honor the request if the amount is less than 66% of the balance
         if (!boosted && monaco.getAccelerateCost(1) <= (car.balance * 66)/100) monaco.buyAcceleration(1);
     }
 
+    // Wraps monaco.buyAcceleration() with some economy checks
     function shell(Monaco.CarData memory car) private {
         uint256 cost = monaco.getShellCost(1);
+        
+        // similar to boost(), we set a budget based on our positioning on the track
         uint threshold;
         if (car.y <= 75) {
             threshold = 8;
@@ -86,6 +114,8 @@ contract ThePackage is Car {
         }
     }
 
+    // Determines if the opponent (in front) is going too fast
+    // if so, stop 'em
     function oppStopper(Monaco.CarData calldata car, Monaco.CarData calldata opps) private pure returns (bool) {
         if (LIMITER <= opps.speed
             || (getGap(car, opps) == GapType.Large)
@@ -108,12 +138,17 @@ contract ThePackage is Car {
             return;
         }
 
+        // record the actions, which is applied at the very end
         uint256 boostCounter;
         bool toShell;
         bool oppMustBeStopped;
+
+        // determine our economy compared to other cars
         GapType eco = getEco(car, allCars[1], allCars[2]);
 
         // market dependent boosting
+        // i.e. if max bidding is cheap, do it
+        //      or if boosts are cheap, just buy them
         if (MID_GAME < car.y)
             boostCounter += max_bid(car);
 
@@ -121,7 +156,7 @@ contract ThePackage is Car {
         if (ourCarIndex != 0)
             oppMustBeStopped = oppStopper(car, allCars[ourCarIndex - 1]);
 
-        // if we're slow at the end, try to rev the engines
+        // if we're slow at the end, try to rev the engines back up
         if (MADMAX <= car.y && car.speed <= 2) {
             boostCounter += 6;
         }
@@ -133,7 +168,7 @@ contract ThePackage is Car {
             return;
         }
 
-        // if we're in a mad max, burn the money
+        // if we're in late game, burn the money
         if (FLATOUT <= car.y){
             if (eco == GapType.Small) boostCounter += 3;
             else if (eco == GapType.Medium) boostCounter += 4;
@@ -144,10 +179,12 @@ contract ThePackage is Car {
             else if (eco == GapType.Large) boostCounter += 6;
         }
 
+        // if we're in late game and its cheap to shell, might as well do it
         if (MADMAX < car.y && ourCarIndex != 0) {
             toShell = toShell || madMaxShelling(car, allCars[ourCarIndex - 1]);
         }
 
+        // main game logic, decide what to do based on position
         uint256 _boost;
         bool _shell;
         (_boost, _shell) = decision(
@@ -157,16 +194,19 @@ contract ThePackage is Car {
         boostCounter += _boost;
         toShell = toShell || _shell;
 
+        // if we're surplus cash, relative our position, spend it
         (_boost, _shell) = checkBurn(ourCarIndex, car, toShell);
         boostCounter += _boost;
         toShell = toShell || _shell;
 
+        // if we're in the late game, and opps cannot afford shells, then boost
         if (MADMAX <= car.y) {
             (_boost) = safeBoost(allCars, ourCarIndex);
             boostCounter += _boost;
         }
         
         // check for a speed demon in the rear view mirror!
+        // if so, we'll hold off shelling until the next turn
         uint256 lagSpeed;
         if (ourCarIndex == 0) {
             lagSpeed = allCars[1].speed < allCars[2].speed ? allCars[2].speed : allCars[1].speed;
@@ -262,6 +302,7 @@ contract ThePackage is Car {
         }
     }
 
+    // spends surplus cash
     function checkBurn(uint256 ourCarIndex, Monaco.CarData calldata car, bool toShell) private view returns (uint256 _moreBoost, bool _toShell) {
         if (MID_GAME < car.y && car.y < MADMAX)
             (_moreBoost, _toShell) = excess_burn(car, ourCarIndex, 1, toShell);
@@ -271,6 +312,7 @@ contract ThePackage is Car {
             (_moreBoost, _toShell) = excess_burn(car, ourCarIndex, 2, toShell);
     }
 
+    // buy extra boost if opps cannot afford shells
     function safeBoost(Monaco.CarData[] calldata allCars, uint256 ourCarIndex) private view returns (uint256 _moreBoost) {
         uint256 opps1Balance;
         uint256 opps2Balance;
@@ -290,6 +332,7 @@ contract ThePackage is Car {
         }
     }
 
+    // random shelling at the end of the game
     function madMaxShelling(Monaco.CarData calldata car, Monaco.CarData calldata opps) private view returns (bool) {
         uint256 rng = randomNumbaBaby(car, opps, car);
         if (monaco.getShellCost(1) < 100 && rng < 65) {
@@ -304,11 +347,18 @@ contract ThePackage is Car {
     // ----------------------------------------------------------------------------------------------
     // Driving Modes
     // ----------------------------------------------------------------------------------------------
+    // calculates how much accelerant we need, relative to an opponents car
+    // i.e. we can maintain speed, or add keep a positive delta over the opps
     function drs(Monaco.CarData calldata car, Monaco.CarData calldata opp, uint256 delta, uint256 fasterCase) private pure returns (uint256 moreBoost) {
         moreBoost = (opp.speed < car.speed) ? fasterCase : (opp.speed + delta - car.speed);
     }
+
+    // determines if theres excess cash to spend
     function excess_burn(Monaco.CarData calldata car, uint256 place, uint256 multiplier, bool shelled) private view returns (uint256 moreBoost, bool toShell) {
-        uint256 unitCost = 13;
+        uint256 unitCost = 13;  // assumes the cost of an action unit is 13; should be 15 (15 units per 1000 distance units = 15,000 cash)
+
+        // using 15000 here means we are targetting an exact balance=0 at y=1000
+        // pad it a bit, so that we end the race with 1500 cash
         uint256 targetBal = 16500 - (car.y * unitCost);
         uint256 boostCost = monaco.getAccelerateCost(multiplier);
         uint256 shellCost = monaco.getShellCost(1);
@@ -323,6 +373,8 @@ contract ThePackage is Car {
             }
         }
     }
+
+    // max bidding / buying cheap boosts
     function max_bid(Monaco.CarData calldata car) private returns (uint256 moreBoost) {
         // if its cheap, fuggit
         uint256 maxBid = monaco.getAccelerateCost(MAX_BID);
@@ -333,7 +385,7 @@ contract ThePackage is Car {
     }
 
     // ----------------------------------------------------------------------------------------------
-    // State
+    // State comparisons. Get data in relation to other cars
     // ----------------------------------------------------------------------------------------------
     function getGap(Monaco.CarData calldata car, Monaco.CarData calldata opp) private pure returns (GapType) {
         Monaco.CarData calldata lead = car.y < opp.y ? opp : car;
