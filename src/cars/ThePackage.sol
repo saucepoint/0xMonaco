@@ -11,15 +11,15 @@ contract ThePackage is Car {
         Large
     }
 
-    uint256 private constant MAX_BID = 5;
-    uint256 private constant MAX_DELTA = 14;
+    uint256 private constant MAX_BID = 6;
+    uint256 private constant MAX_DELTA = 16;
     uint256 private constant DENIMONATOR = 100;
     // when different race phases START. i.e. engage flat out after y=860
     uint256 private constant MID_GAME = 450;
     uint256 private constant MADMAX = 770;
     uint256 private constant FLATOUT = 855;
     uint256 private constant LAGGING_SPEED_DEMON = 16;
-    uint256 private constant LIMITER = 20;
+    uint256 private constant LIMITER = 18;
     uint256 private constant DELTA_LIMITER = 8;
 
     constructor(Monaco _monaco) Car(_monaco) {}
@@ -41,7 +41,7 @@ contract ThePackage is Car {
         if (car.y < MID_GAME) {
             threshold = 20;
         } else if (MID_GAME <= car.y && car.y < MADMAX) {
-            threshold = 15;
+            threshold = 10;
         } else if (MADMAX <= car.y && car.y < FLATOUT) {
             threshold = (2400 < car.balance) ? 4 : 5;
         } else if (FLATOUT <= car.y) {
@@ -69,9 +69,9 @@ contract ThePackage is Car {
         if (car.y <= 75) {
             threshold = 8;
         } else if (car.y < MID_GAME) {
-            threshold = 25;
+            threshold = 20;
         } else if  (MID_GAME <= car.y && car.y < MADMAX) {
-            threshold = 15;
+            threshold = 12;
         } else if (MADMAX <= car.y && car.y < FLATOUT && 2000 < car.balance) {
             threshold = 2;
         } else if (MADMAX <= car.y && car.y < FLATOUT) {
@@ -138,10 +138,10 @@ contract ThePackage is Car {
             if (eco == GapType.Small) boostCounter += 3;
             else if (eco == GapType.Medium) boostCounter += 4;
             else if (eco == GapType.Large) boostCounter += 6;
-        } else if (MADMAX < car.y || MADMAX < allCars[1].y) {
-            if (eco == GapType.Small) boostCounter += 0;
-            else if (eco == GapType.Medium) boostCounter += 1;
-            else if (eco == GapType.Large) boostCounter += 2;
+        } else if (MADMAX < allCars[0].y || MADMAX < allCars[1].y || MADMAX < allCars[2].y) {
+            if (eco == GapType.Small) boostCounter += 1;
+            else if (eco == GapType.Medium) boostCounter += 2;
+            else if (eco == GapType.Large) boostCounter += 6;
         }
 
         if (MADMAX < car.y && ourCarIndex != 0) {
@@ -285,7 +285,7 @@ contract ThePackage is Car {
             opps2Balance = allCars[1].balance;
         }
         uint256 shellCost = monaco.getShellCost(1);
-        if (opps1Balance < shellCost && opps2Balance < shellCost) {
+        if (opps1Balance < shellCost || opps2Balance < shellCost) {
             _moreBoost = 2;
         }
     }
@@ -308,8 +308,8 @@ contract ThePackage is Car {
         moreBoost = (opp.speed < car.speed) ? fasterCase : (opp.speed + delta - car.speed);
     }
     function excess_burn(Monaco.CarData calldata car, uint256 place, uint256 multiplier, bool shelled) private view returns (uint256 moreBoost, bool toShell) {
-        uint256 unitCost = 12;
-        uint256 targetBal = 16400 - (car.y * unitCost);
+        uint256 unitCost = 13;
+        uint256 targetBal = 16500 - (car.y * unitCost);
         uint256 boostCost = monaco.getAccelerateCost(multiplier);
         uint256 shellCost = monaco.getShellCost(1);
         bool boostCheaper = boostCost < shellCost ? true : false;
